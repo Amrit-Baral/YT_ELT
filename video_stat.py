@@ -6,7 +6,7 @@ from pathlib import Path
 
 load_dotenv(dotenv_path="./.env")
 Api_Key = os.getenv('YT_API_KEY')
-
+maxResults = 50
 
 def get_playlist_id(Channel_Handle=None):
 
@@ -24,9 +24,9 @@ def get_playlist_id(Channel_Handle=None):
 
         data = response.json()
 
-        file_path = Path("video_stat.json")
-
-        file_path.write_text(json.dumps(data, indent=4), encoding='utf-8')
+        # Code to save Response to file video_stat.json
+        # file_path = Path("video_stat.json")
+        # file_path.write_text(json.dumps(data, indent=4), encoding='utf-8')
 
         channel_items = data["items"][0]
 
@@ -40,5 +40,43 @@ def get_playlist_id(Channel_Handle=None):
         raise e
 
 
+def get_video_ids(playlist_id):
+
+    video_ids = []
+
+    base_url = f"https://youtube.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults={maxResults}&playlistId={playlist_id}&key={Api_Key}"
+
+    pageToken = None
+
+    try:
+        while True:
+            url = base_url
+
+            if pageToken:
+                url+= f"&pageToken={pageToken}"
+            
+            response = requests.get(url)
+
+            response.raise_for_status()
+
+            data = response.json()
+
+            for i in data.get("items", []):
+                video_id = i["contentDetails"]["videoId"]
+                video_ids.append(video_id)
+            
+            pageToken = data.get("nextPageToken")
+
+            if not pageToken:
+                break
+        
+        return video_ids
+
+    
+    except requests.exceptions.RequestException as e:
+        raise e
+
+
 if __name__ == "__main__":
-    get_playlist_id()
+    playlist_id = get_playlist_id()
+    print(get_video_ids(playlist_id))
