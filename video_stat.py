@@ -3,6 +3,7 @@ import requests
 from dotenv import load_dotenv
 import json
 from pathlib import Path
+from datetime import date, datetime, timedelta
 
 load_dotenv(dotenv_path="./.env")
 Api_Key = os.getenv('YT_API_KEY')
@@ -92,6 +93,8 @@ def extract_video_data(video_ids):
 
             response = requests.get(url)
 
+            extraction_timestamp = datetime.now().isoformat()
+
             response.raise_for_status()
 
             data = response.json()
@@ -103,13 +106,15 @@ def extract_video_data(video_ids):
                 statistics = item["statistics"]
 
                 video_data = {
+                    "channelhandle" : Channel_Handle,
                     "video_id" : video_id,
                     "title" : snippet["title"],
                     "publishedAt" : snippet["publishedAt"],
                     "duration" : contentDetails["duration"],
                     "viewCount" : statistics.get("viewCount", None),
                     "likeCount" : statistics.get("likeCount", None),
-                    "commentCount" : statistics.get("commentCount", None)
+                    "commentCount" : statistics.get("commentCount", None),
+                    "extractTimestamp" : extraction_timestamp
                 }
 
                 extracted_data.append(video_data)
@@ -118,9 +123,17 @@ def extract_video_data(video_ids):
     
     except requests.exceptions.RequestException as e:
         raise e
+    
+def save_to_json(extracted_data):
+    filePath = f"./data/yt_video_stats_{Channel_Handle}_{date.today()}.json"
+    
+    with open(filePath, "w", encoding="utf-8") as json_outfile:
+        json.dump(extracted_data, json_outfile, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":
-    playlist_id = get_playlist_id()
+    Channel_Handle = "PJExplained"
+    playlist_id = get_playlist_id(Channel_Handle)
     video_ids = get_video_ids(playlist_id)
     video_data = extract_video_data(video_ids)
+    save_to_json(video_data)

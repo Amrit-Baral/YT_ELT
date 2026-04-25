@@ -1,24 +1,29 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.venv/
-env/
+# # Python
+# __pycache__/
+# *.py[cod]
+# *$py.class
+# .venv/
+# env/
+# venv/
+# build/
+# dist/
+
+# # Docker
+# .docker/
+
+# # Data & Credentials (CRITICAL)
+# .env
+# *.csv
+# *.json
+# *.log
+# data/
+
+# # macOS System Files
+# .DS_Store
+# .AppleDouble
+# .LSOverride
+
 venv/
-build/
-dist/
-
-# Docker
-.docker/
-
-# Data & Credentials (CRITICAL)
+__pycache__/
 .env
-*.csv
-*.json
-*.log
-data/
-
-# macOS System Files
-.DS_Store
-.AppleDouble
-.LSOverride
+logs/
